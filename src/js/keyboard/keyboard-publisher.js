@@ -17,6 +17,8 @@ function getROSBridgeURL() {
   else{
       secure = undefined;
   }
+  
+  secure = true;
 
   var rosbridgeURL = getUrlVars()["rosbridge_url"]; // ws://localhost:9090 or localhost:9090
   rosbridgeURL = decodeURIComponent(rosbridgeURL);
