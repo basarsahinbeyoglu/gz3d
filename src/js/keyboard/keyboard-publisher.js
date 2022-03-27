@@ -43,7 +43,7 @@ function getROSBridgeURL() {
   return secureWebsocketProtocol + rosbridgeURL
 }
 
-var rosbridgeURL = getROSBridgeURL();
+var rosbridgeURL = window.location.hostname.replace("8888", 9090);
 
 var keyboardUp;
 var keyboardDown;
