@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+    <title>[GzWeb] Embedded ({{VERSION}})</title>
+    <meta charset="utf-8">
+    <script src="js/eventemitter2.js?v={{VERSION}}"></script>
+    <script src="js/Detector.js?v={{VERSION}}"></script>
+    <script src="js/roslib.js?v={{VERSION}}"></script>
+    <script src="js/xml2json.js?v={{VERSION}}"></script>
+    <script src="js/three.js?v={{VERSION}}"></script>
+    <script src="js/three.compat.js?v={{VERSION}}"></script>
+    <script src="js/MTLLoader.js?v={{VERSION}}"></script>
+    <script src="js/OBJLoader.js?v={{VERSION}}"></script>
+    <script src="js/OrbitControls.js?v={{VERSION}}"></script>
+    <script src="js/STLLoader.js?v={{VERSION}}"></script>
+    <script src="js/ColladaLoader.js?v={{VERSION}}"></script>
+
+    <script src="js/gz/gz.js?v={{VERSION}}"></script>
+    <script src="js/gz/gziface.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzmanipulator.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzobjloader.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzscene.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzsdfparser.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzshaders.js?v={{VERSION}}"></script>
+    <script src="js/gz/gzspawnmodel.js?v={{VERSION}}"></script>
+    
+    <!-- GZWEB KEYBOARD EVENTS FOR ROS -->
+    <script type="text/javascript" src="js/keyboard/keyboard-publisher.js?v={{VERSION}}"></script>
+    <script type="text/javascript" src="js/keyboard/keyboard-text.js?v={{VERSION}}"></script>
+    <link rel="stylesheet" href="./css/index.css?V={{VERSION}}">
+
+    <!-- GZWEB SIMULATION METRIC DISPLAY -->
+    <script type="text/javascript" src="js/simulationMetric.js?v={{VERSION}}"></script>
+</head>
+
+<body>
+    <style>      
+      #menu {
+          position: absolute;
+          top: 0;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          max-height: 100%;
+          margin: 20px;
+          overflow: hidden;
+      }
+      </style>
+<div id="keyboard-info"></div>
+<div id="riders-simulation-metrics-container"></div>
+
+<center>
+    <div id="container">
+    </div>
+</center>
+
+<div id="menu">
+    <ul id="urdf-options">
+        <li urdf="../../../urdf/T12/urdf/T12_flipped.URDF" color="#E91E63">ATHLETE</li>
+        <li urdf="../../../urdf/TriATHLETE/urdf/TriATHLETE_flipped.URDF" color="#009688">TriATHLETE</li>
+        <li urdf="../../../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#FFB300">TriATHLETE Climbing</li>
+    </ul>
+</div>
+
+<script>
+    if (!Detector.webgl) {
+        Detector.addGetWebGLMessage();
+    }
+        
+    var scene, container, playDiv;
+
+    // Initialization
+    function init(url, cameraType, fov, cameraTargetOffset, cameraYaw, cameraPitch, cameraDistance, followModel, interpolateCameraRate,
+                  interpModel, interpolatePositionRate, interpolateRotationRate, interpolateSnapDistance, fogDistance, fogColor)
+    {
+        var secure = getUrlVars()['secure'];
+        if (secure && (secure == "1" || secure == "true")) {
+            secure = true;
+        }
+        else{
+            secure = undefined;
+        }
+
+        secure = true;
+
+        // Initialize objects
+        var shaders = new GZ3D.Shaders();
+        scene = new GZ3D.Scene(shaders, cameraType, fov, cameraTargetOffset, cameraYaw, cameraPitch, cameraDistance, followModel, interpolateCameraRate,
+                               interpModel, interpolatePositionRate, interpolateRotationRate, interpolateSnapDistance, fogDistance, fogColor);
+        var iface = new GZ3D.GZIface(scene, url, secure);
+        var sdfparser = new GZ3D.SdfParser(scene, undefined, iface);
+
+        // Configure scene
+        scene.grid.visible = true;
+
+        // Append to dom
+        container = document.getElementById( 'container' );
+        container.clientHeight = window.innerHeight;
+        container.innerHTML = `
+            <div class="loader-container">
+                <img src="./img/riders-animation.gif" alt="riders-logo" />
+            </div>
+            `
+
+        var interval = setInterval(function() {
+            if (iface.isConnected) {
+                loading = document.getElementsByClassName("loader-container")
+                container.removeChild(loading[0])
+                container.appendChild(scene.getDomElement());
+                const slider = document.createElement('slider');
+                slider.innerHTML = `<span title="camera_distance">"Camera Distance"</span>
+                        <input id="camera_distance_1" type="range" value="5" min="1" max="10" step="0.1"/>`
+                container.appendChild(slider);
+                window.addEventListener('resize', onWindowResize, false);
+                onWindowResize();
+
+                animate();
+                clearInterval(interval)
+            }
+        }, 5000)
+    }
+
+    // Callback when window is resized
+    function onWindowResize()
+    {
+        scene.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    // Recursively called animation loop
+    function animate()
+    {
+        requestAnimationFrame(animate);
+        scene.render();
+    }
+
+    // Callback when user requests to play simulation
+    function userPlay()
+    {
+        // Send commands by using the emitter
+        scene.emitter.emit('pause', false);
+    }
+
+    // Callback when user requests to pause simulation
+    function userPause()
+    {
+        scene.emitter.emit('pause', true);
+    }
+
+    var urlVars = getUrlVars()
+
+    var rosAddress = window.location.hostname.replace("8888", 9090);
+    var gzAddress = window.location.hostname.replace("8888", 8080);
+    var gznodeURL = gzAddress //urlVars['gznode_url'];
+
+    // camera parameters
+    var cameraType = urlVars['camera']; // fixed (yaw/pitch constant) or follow (must set followModel and yaw/pitch relative to target object)
+    var fov = urlVars['fov']; // field of view single double - in degrees
+    var cameraTargetOffset = urlVars['camera_target_offset']; // three numbers: x, y, z - offset from followModel if it is set, otherwise offset from world origin
+    if(cameraTargetOffset) {
+      cameraTargetOffset = cameraTargetOffset.split(",").map(t => parseFloat(t));
+    }
+    var cameraYaw = urlVars['camera_yaw']; // one number - camera left/right yaw in radians
+    var cameraPitch = urlVars['camera_pitch']; // one number - camera up/down pitch in radians - -0.5 would be looking down slightly
+    var cameraDistance = urlVars['camera_distance']; // one number - how far camera is from target object
+    var followModel = urlVars['camera_follow_model']; // string name - must be declared for follow cameras, optional for fixed camera
+    var interpolateCameraRate = urlVars['interpolate_camera_rate']; // how fast to interpolate camera positions 0-1.0
+
+    // interpolation properties
+    var interpModel = urlVars['interpolate_model']; // string name - we are not following the model, but we still want to interpolate it to smooth out effects
+    var interpolatePositionRate = urlVars['interpolate_position_rate']; // how fast to interpolate positions 0-1.0
+    var interpolateRotationRate = urlVars['interpolate_rotation_rate']; // how fast to interpolate rotations 0-1.0
+    var interpolateSnapDistance = urlVars['interpolate_snap_distance']; // if robot moves more than this assume it's a reset and reset interpolations
+
+    // fog parameters
+    var fogColor = urlVars['fog_color']; // will be three numbers - rgb 0-1.0
+    if (fogColor) {
+      fogColor = fogColor.split(",").map(t => parseFloat(t));
+    }
+    var fogDistance = urlVars['fog_distance']; // will be two numbers - near, far
+    if (fogDistance) {
+      fogDistance = fogDistance.split(",").map(t => parseFloat(t));
+    }
+
+    if (gznodeURL){
+        gznodeURL = decodeURIComponent(gznodeURL);
+        init(gznodeURL, cameraType, fov, cameraTargetOffset, cameraYaw, cameraPitch, cameraDistance, followModel, interpolateCameraRate,
+             interpModel, interpolatePositionRate, interpolateRotationRate, interpolateSnapDistance, fogDistance, fogColor);
+    }
+</script>
+
+</body>
+</html>

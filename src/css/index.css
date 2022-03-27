@@ -1,0 +1,139 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: sans;
+}
+#container {
+  width: 100%;
+  height: 100vh;
+}
+#keyboard-info {
+  position: absolute;
+  right: 20px;
+  top: 5px;
+}
+.filter-green-svg {
+  filter: invert(59%) sepia(76%) saturate(3516%) hue-rotate(82deg)
+    brightness(121%) contrast(122%); /*Filter value for color green (#00FF00)*/
+}
+.ant-row-flex-center {
+  justify-content: center;
+}
+.ant-row-flex {
+  display: flex;
+  flex-flow: row wrap;
+}
+.ant-col-20 {
+  display: block;
+  box-sizing: border-box;
+  width: 83.33333333%;
+}
+.ant-col-1,
+.ant-col-2,
+.ant-col-3,
+.ant-col-4,
+.ant-col-5,
+.ant-col-6,
+.ant-col-7,
+.ant-col-8,
+.ant-col-9,
+.ant-col-10,
+.ant-col-11,
+.ant-col-12,
+.ant-col-13,
+.ant-col-14,
+.ant-col-15,
+.ant-col-16,
+.ant-col-17,
+.ant-col-18,
+.ant-col-19,
+.ant-col-20,
+.ant-col-21,
+.ant-col-22,
+.ant-col-23,
+.ant-col-24 {
+  flex: 0 0 auto;
+  float: left;
+  position: relative;
+  padding-right: 0;
+  padding-left: 0;
+}
+.ant-col {
+  position: relative;
+  min-height: 1px;
+}
+.ant-row-flex::before,
+.ant-row-flex::after {
+  display: flex;
+}
+.ant-row-flex {
+  display: flex;
+  flex-flow: row wrap;
+}
+.ant-col-6 {
+  display: block;
+  box-sizing: border-box;
+  width: 25%;
+}
+.icon {
+  margin: auto;
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  cursor: pointer;
+}
+
+.icon svg {
+  display: block;
+  font-size: 24px;
+  position: relative;
+}
+.icon#maximize-icon {
+  top: unset;
+  bottom: 10px;
+  color: #060f30;
+}
+#riders-simulation-metrics {
+  font-size: 14px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0px;
+  padding: 10px 0;
+  background-color: #060f30;
+  color: white;
+}
+
+#riders-simulation-metrics > div {
+  position: relative;
+}
+
+#riders-simulation-metrics .title {
+  font-weight: bold;
+}
+
+#riders-simulation-metrics .icon.minimize svg {
+  top: 50%;
+  transform: translateY(-50%);
+}
+#riders-simulation-metrics .hidden {
+  display: none;
+}
+.hidden {
+  display: none;
+}
+
+.loader-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+}
+.loader-container img {
+  width: 100%;
+  padding-left: 30%;
+}
