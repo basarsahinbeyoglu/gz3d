@@ -19,7 +19,7 @@ GZ3D.Scene = function (shaders, camera_type, fov, camera_target_offset, camera_y
   this.fov = fov ? fov : 60.0; // field of view single double - in degrees
 
   // cameraTargetOffset is relative to origin of world, or relative to followModel if set
-  this.cameraTargetOffset = new THREE.Vector3(0.0, 0.0, 0.0); // default is 0, 0, 0
+  this.cameraTargetOffset = new THREE.Vector3(0.0, 0.0, -1.0); // default is 0, 0, 0
   if (camera_target_offset) {
     this.cameraTargetOffset.fromArray(camera_target_offset); // set from parameter array if it was used
   }
