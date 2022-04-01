@@ -65,6 +65,7 @@ var listener = new ROSLIB.Topic({
 });
 
 listener.subscribe(function(message) {
+    console.log(message)
   if (!message.data) {
     return;
   }
