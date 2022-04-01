@@ -17,8 +17,6 @@ function getROSBridgeURL() {
   else{
       secure = undefined;
   }
-  
-  secure = true;
 
   var rosbridgeURL = getUrlVars()["rosbridge_url"]; // ws://localhost:9090 or localhost:9090
   rosbridgeURL = decodeURIComponent(rosbridgeURL);
@@ -43,7 +41,8 @@ function getROSBridgeURL() {
   return secureWebsocketProtocol + rosbridgeURL
 }
 
-var rosbridgeURL = window.location.hostname.replace("8888", 9090);
+var rosaddress = window.location.hostname.replace("8888", 9090);
+var rosbridgeURL = 'wss://' + rosaddress
 
 var keyboardUp;
 var keyboardDown;
